@@ -12,21 +12,24 @@ export default async function Footer() {
   const productCategories = await listCategories()
 
   return (
-    <footer className="border-t border-ui-border-base w-full">
+    <footer className="border-t border-ui-border-base w-full bg-ui-bg-subtle">
       <div className="content-container flex flex-col w-full">
-        <div className="flex flex-col gap-y-6 xsmall:flex-row items-start justify-between py-40">
-          <div>
+        <div className="flex flex-col gap-y-8 xsmall:flex-row items-start justify-between py-16">
+          <div className="flex flex-col gap-y-4">
             <LocalizedClientLink
               href="/"
-              className="txt-compact-xlarge-plus text-ui-fg-subtle hover:text-ui-fg-base uppercase"
+              className="txt-compact-xlarge-plus text-ui-fg-base hover:text-ui-fg-subtle uppercase font-semibold tracking-wider transition-colors"
             >
-              Medusa Store
+              Medusa
             </LocalizedClientLink>
+            <Text className="text-ui-fg-muted txt-small">
+              Seamless shopping experience
+            </Text>
           </div>
-          <div className="text-small-regular gap-10 md:gap-x-16 grid grid-cols-2 sm:grid-cols-3">
+          <div className="text-small-regular gap-10 md:gap-x-16 grid grid-cols-2 sm:grid-cols-3 flex-1">
             {productCategories && productCategories?.length > 0 && (
-              <div className="flex flex-col gap-y-2">
-                <span className="txt-small-plus txt-ui-fg-base">
+              <div className="flex flex-col gap-y-4">
+                <span className="txt-small-plus txt-ui-fg-base font-semibold">
                   Categories
                 </span>
                 <ul
@@ -83,8 +86,8 @@ export default async function Footer() {
               </div>
             )}
             {collections && collections.length > 0 && (
-              <div className="flex flex-col gap-y-2">
-                <span className="txt-small-plus txt-ui-fg-base">
+              <div className="flex flex-col gap-y-4">
+                <span className="txt-small-plus txt-ui-fg-base font-semibold">
                   Collections
                 </span>
                 <ul
@@ -108,9 +111,9 @@ export default async function Footer() {
                 </ul>
               </div>
             )}
-            <div className="flex flex-col gap-y-2">
-              <span className="txt-small-plus txt-ui-fg-base">Medusa</span>
-              <ul className="grid grid-cols-1 gap-y-2 text-ui-fg-subtle txt-small">
+            <div className="flex flex-col gap-y-4">
+              <span className="txt-small-plus txt-ui-fg-base font-semibold">Resources</span>
+              <ul className="grid grid-cols-1 gap-y-3 text-ui-fg-subtle txt-small">
                 <li>
                   <a
                     href="https://github.com/medusajs"
@@ -145,9 +148,9 @@ export default async function Footer() {
             </div>
           </div>
         </div>
-        <div className="flex w-full mb-16 justify-between text-ui-fg-muted">
+        <div className="flex w-full py-8 justify-between text-ui-fg-muted border-t border-ui-border-base">
           <Text className="txt-compact-small">
-            © {new Date().getFullYear()} Medusa Store. All rights reserved.
+            © {new Date().getFullYear()} Medusa. All rights reserved.
           </Text>
           <MedusaCTA />
         </div>
