@@ -10,8 +10,8 @@ import {
 import { Fragment, useEffect, useMemo, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import ReactCountryFlag from "react-country-flag"
+import { ChevronDownMini } from "@medusajs/icons"
 
-import { StateType } from "@lib/hooks/use-toggle-state"
 import { updateLocale } from "@lib/data/locale-actions"
 import { Locale } from "@lib/data/locales"
 
@@ -37,7 +37,6 @@ const getCountryCodeFromLocale = (localeCode: string): string => {
 }
 
 type LanguageSelectProps = {
-  toggleState: StateType
   locales: Locale[]
   currentLocale: string | null
 }
@@ -69,15 +68,13 @@ const DEFAULT_OPTION: LanguageOption = {
 }
 
 const LanguageSelect = ({
-  toggleState,
   locales,
   currentLocale,
 }: LanguageSelectProps) => {
   const [current, setCurrent] = useState<LanguageOption | undefined>(undefined)
   const [isPending, startTransition] = useTransition()
+  const [isOpen, setIsOpen] = useState(false)
   const router = useRouter()
-
-  const { state, close } = toggleState
 
   const options = useMemo(() => {
     const localeOptions = locales.map((locale) => ({
@@ -107,30 +104,24 @@ const LanguageSelect = ({
   const handleChange = (option: LanguageOption) => {
     startTransition(async () => {
       await updateLocale(option.code)
-      close()
+      setIsOpen(false)
       router.refresh()
     })
   }
 
   return (
-    <div>
+    <div className="relative">
       <Listbox
-        as="span"
+        as="div"
         onChange={handleChange}
-        defaultValue={
-          currentLocale
-            ? options.find(
-                (o) => o.code.toLowerCase() === currentLocale.toLowerCase()
-              ) ?? DEFAULT_OPTION
-            : DEFAULT_OPTION
-        }
+        value={current}
         disabled={isPending}
       >
-        <ListboxButton className="py-1 w-full">
-          <div className="txt-compact-small flex items-start gap-x-2">
-            <span>Language:</span>
+        <ListboxButton className="py-2 px-3 flex items-center gap-x-2 hover:bg-ui-bg-base rounded-md transition-colors">
+          <div className="txt-compact-small flex items-center gap-x-2 cursor-pointer">
+            <span className="hidden sm:inline text-ui-fg-subtle">Language:</span>
             {current && (
-              <span className="txt-compact-small flex items-center gap-x-2">
+              <span className="flex items-center gap-x-2">
                 {current.countryCode && (
                   /* @ts-ignore */
                   <ReactCountryFlag
@@ -142,28 +133,37 @@ const LanguageSelect = ({
                     countryCode={current.countryCode}
                   />
                 )}
-                {isPending ? "..." : current.localizedName}
+                <span className="text-ui-fg-base">
+                  {isPending ? "..." : current.localizedName}
+                </span>
               </span>
             )}
+            <ChevronDownMini className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
           </div>
         </ListboxButton>
-        <div className="flex relative w-full min-w-[320px]">
-          <Transition
-            show={state}
-            as={Fragment}
-            leave="transition ease-in duration-150"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
+
+        <Transition
+          show={isOpen}
+          as={Fragment}
+          enter="transition ease-out duration-100"
+          enterFrom="opacity-0 scale-95"
+          enterTo="opacity-100 scale-100"
+          leave="transition ease-in duration-100"
+          leaveFrom="opacity-100 scale-100"
+          leaveTo="opacity-0 scale-95"
+          beforeEnter={() => setIsOpen(true)}
+          beforeLeave={() => setIsOpen(false)}
+        >
+          <ListboxOptions
+            className="absolute top-full mt-2 right-0 w-56 z-[900] bg-white border border-ui-border-base shadow-lg rounded-lg overflow-hidden"
+            static
           >
-            <ListboxOptions
-              className="absolute -bottom-[calc(100%-36px)] left-0 xsmall:left-auto xsmall:right-0 max-h-[442px] overflow-y-scroll z-[900] bg-white drop-shadow-md text-small-regular uppercase text-black no-scrollbar rounded-rounded w-full"
-              static
-            >
+            <div className="max-h-[400px] overflow-y-auto">
               {options.map((o) => (
                 <ListboxOption
                   key={o.code || "default"}
                   value={o}
-                  className="py-2 hover:bg-gray-200 px-3 cursor-pointer flex items-center gap-x-2"
+                  className="py-2 px-3 hover:bg-ui-bg-base cursor-pointer flex items-center gap-x-2 transition-colors text-ui-fg-base text-small-regular"
                 >
                   {o.countryCode ? (
                     /* @ts-ignore */
@@ -178,12 +178,12 @@ const LanguageSelect = ({
                   ) : (
                     <span style={{ width: "16px", height: "16px" }} />
                   )}
-                  {o.localizedName}
+                  <span>{o.localizedName}</span>
                 </ListboxOption>
               ))}
-            </ListboxOptions>
-          </Transition>
-        </div>
+            </div>
+          </ListboxOptions>
+        </Transition>
       </Listbox>
     </div>
   )

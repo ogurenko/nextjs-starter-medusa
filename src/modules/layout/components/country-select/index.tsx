@@ -9,8 +9,8 @@ import {
 } from "@headlessui/react"
 import { Fragment, useEffect, useMemo, useState } from "react"
 import ReactCountryFlag from "react-country-flag"
+import { ChevronDownMini } from "@medusajs/icons"
 
-import { StateType } from "@lib/hooks/use-toggle-state"
 import { useParams, usePathname } from "next/navigation"
 import { updateRegion } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
@@ -22,20 +22,18 @@ type CountryOption = {
 }
 
 type CountrySelectProps = {
-  toggleState: StateType
   regions: HttpTypes.StoreRegion[]
 }
 
-const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
+const CountrySelect = ({ regions }: CountrySelectProps) => {
   const [current, setCurrent] = useState<
     | { country: string | undefined; region: string; label: string | undefined }
     | undefined
   >(undefined)
+  const [isOpen, setIsOpen] = useState(false)
 
   const { countryCode } = useParams()
   const currentPath = usePathname().split(`/${countryCode}`)[1]
-
-  const { state, close } = toggleState
 
   const options = useMemo(() => {
     return regions
@@ -59,25 +57,21 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
 
   const handleChange = (option: CountryOption) => {
     updateRegion(option.country, currentPath)
-    close()
+    setIsOpen(false)
   }
 
   return (
-    <div>
+    <div className="relative">
       <Listbox
-        as="span"
+        as="div"
         onChange={handleChange}
-        defaultValue={
-          countryCode
-            ? options?.find((o) => o?.country === countryCode)
-            : undefined
-        }
+        value={current}
       >
-        <ListboxButton className="py-1 w-full">
-          <div className="txt-compact-small flex items-start gap-x-2">
-            <span>Shipping to:</span>
+        <ListboxButton className="py-2 px-3 flex items-center gap-x-2 hover:bg-ui-bg-base rounded-md transition-colors">
+          <div className="txt-compact-small flex items-center gap-x-2 cursor-pointer">
+            <span className="hidden sm:inline text-ui-fg-subtle">Region:</span>
             {current && (
-              <span className="txt-compact-small flex items-center gap-x-2">
+              <span className="flex items-center gap-x-2">
                 {/* @ts-ignore */}
                 <ReactCountryFlag
                   svg
@@ -87,29 +81,36 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
                   }}
                   countryCode={current.country ?? ""}
                 />
-                {current.label}
+                <span className="text-ui-fg-base">{current.label}</span>
               </span>
             )}
+            <ChevronDownMini className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
           </div>
         </ListboxButton>
-        <div className="flex relative w-full min-w-[320px]">
-          <Transition
-            show={state}
-            as={Fragment}
-            leave="transition ease-in duration-150"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
+
+        <Transition
+          show={isOpen}
+          as={Fragment}
+          enter="transition ease-out duration-100"
+          enterFrom="opacity-0 scale-95"
+          enterTo="opacity-100 scale-100"
+          leave="transition ease-in duration-100"
+          leaveFrom="opacity-100 scale-100"
+          leaveTo="opacity-0 scale-95"
+          beforeEnter={() => setIsOpen(true)}
+          beforeLeave={() => setIsOpen(false)}
+        >
+          <ListboxOptions
+            className="absolute top-full mt-2 right-0 w-56 z-[900] bg-white border border-ui-border-base shadow-lg rounded-lg overflow-hidden"
+            static
           >
-            <ListboxOptions
-              className="absolute -bottom-[calc(100%-36px)] left-0 xsmall:left-auto xsmall:right-0 max-h-[442px] overflow-y-scroll z-[900] bg-white drop-shadow-md text-small-regular uppercase text-black no-scrollbar rounded-rounded w-full"
-              static
-            >
+            <div className="max-h-[400px] overflow-y-auto">
               {options?.map((o, index) => {
                 return (
                   <ListboxOption
                     key={index}
                     value={o}
-                    className="py-2 hover:bg-gray-200 px-3 cursor-pointer flex items-center gap-x-2"
+                    className="py-2 px-3 hover:bg-ui-bg-base cursor-pointer flex items-center gap-x-2 transition-colors text-ui-fg-base text-small-regular"
                   >
                     {/* @ts-ignore */}
                     <ReactCountryFlag
@@ -119,14 +120,14 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
                         height: "16px",
                       }}
                       countryCode={o?.country ?? ""}
-                    />{" "}
-                    {o?.label}
+                    />
+                    <span>{o?.label}</span>
                   </ListboxOption>
                 )
               })}
-            </ListboxOptions>
-          </Transition>
-        </div>
+            </div>
+          </ListboxOptions>
+        </Transition>
       </Listbox>
     </div>
   )

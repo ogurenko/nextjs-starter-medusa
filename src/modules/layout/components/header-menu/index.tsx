@@ -1,8 +1,7 @@
 "use client"
 
 import { Popover, PopoverPanel, Transition } from "@headlessui/react"
-import { ArrowRightMini, XMark } from "@medusajs/icons"
-import { Text, clx, useToggleState } from "@medusajs/ui"
+import { XMark } from "@medusajs/icons"
 import { Fragment } from "react"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -25,12 +24,9 @@ type HeaderMenuProps = {
 }
 
 const HeaderMenu = ({ regions, locales, currentLocale }: HeaderMenuProps) => {
-  const countryToggleState = useToggleState()
-  const languageToggleState = useToggleState()
-
   return (
     <div className="h-full">
-      <div className="flex items-center h-full gap-x-4 md:gap-x-6">
+      <div className="flex items-center h-full gap-x-2 md:gap-x-4">
         <Popover className="h-full flex relative md:hidden">
           {({ open, close }) => (
             <>
@@ -82,39 +78,17 @@ const HeaderMenu = ({ regions, locales, currentLocale }: HeaderMenuProps) => {
                     </ul>
                     <div className="border-t border-ui-border-base mt-4 pt-4 px-4 flex flex-col gap-y-4">
                       {!!locales?.length && (
-                        <div
-                          className="flex justify-between items-center"
-                          onMouseEnter={languageToggleState.open}
-                          onMouseLeave={languageToggleState.close}
-                        >
+                        <div>
                           <LanguageSelect
-                            toggleState={languageToggleState}
                             locales={locales}
                             currentLocale={currentLocale}
-                          />
-                          <ArrowRightMini
-                            className={clx(
-                              "transition-transform duration-150",
-                              languageToggleState.state ? "-rotate-90" : ""
-                            )}
                           />
                         </div>
                       )}
                       {regions && (
-                        <div
-                          className="flex justify-between items-center"
-                          onMouseEnter={countryToggleState.open}
-                          onMouseLeave={countryToggleState.close}
-                        >
+                        <div>
                           <CountrySelect
-                            toggleState={countryToggleState}
                             regions={regions}
-                          />
-                          <ArrowRightMini
-                            className={clx(
-                              "transition-transform duration-150",
-                              countryToggleState.state ? "-rotate-90" : ""
-                            )}
                           />
                         </div>
                       )}
@@ -126,16 +100,14 @@ const HeaderMenu = ({ regions, locales, currentLocale }: HeaderMenuProps) => {
           )}
         </Popover>
 
-        <div className="hidden md:flex items-center gap-x-4">
+        <div className="hidden md:flex items-center gap-x-2">
           {regions && (
             <CountrySelect
-              toggleState={countryToggleState}
               regions={regions}
             />
           )}
           {locales?.length && (
             <LanguageSelect
-              toggleState={languageToggleState}
               locales={locales}
               currentLocale={currentLocale}
             />
